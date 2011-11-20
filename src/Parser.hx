@@ -39,6 +39,8 @@ class Parser
 						
 						rawContent = escape.customReplace(rawContent, escapeHtml);
 						
+						rawContent = StringTools.replace(rawContent, "\r\n", "<br>");
+						
 						post.content = rawContent;
 						
 					case "wp:post_date":
