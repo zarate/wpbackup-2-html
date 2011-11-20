@@ -156,7 +156,7 @@ class Main
 				backToIndexLink = "../" + backToIndexLink;
 			}
 			
-			xa.File.write(postFolder + xa.System.UNIX_SEPARATOR + "index.htm", renderPage(postTemplate.execute({content: post.content, linkToIndex: backToIndexLink}), post.title));
+			xa.File.write(postFolder + xa.System.UNIX_SEPARATOR + "index.htm", renderPage(postTemplate.execute({content: post.content, title: post.title, linkToIndex: backToIndexLink}), post.title));
 		}
 	}
 	
