@@ -84,8 +84,31 @@ class Main
 		}
 		
 		posts = Parser.parse(xa.File.read(wpBackupFilePath));
+		posts.sort(sortByDate);
 		
 		log("Found " + posts.length + " posts");
+	}
+	
+	function sortByDate(a : Post, b : Post) : Int
+	{
+		var ret : Int = null;
+		
+		var diff : Float = a.date.getTime() - b.date.getTime();
+		
+		if(diff == 0)
+		{
+			ret = 0;
+		}
+		else if(diff > 0)
+		{
+			ret = -1;
+		}
+		else
+		{
+			ret = 1;
+		}
+		
+		return ret;
 	}
 	
 	function outputStaticHTMLPages() : Void
@@ -122,7 +145,7 @@ class Main
 			var postFolder = createDateFolder(post);
 			
 			var postTemplate = new haxe.Template(postTemplateContent);
-			
+				
 			// this back to index thing is far from elegant, i know
 			var backToIndexLink = "index.html";
 			
