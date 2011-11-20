@@ -26,7 +26,20 @@ class Parser
 						post.status = element.innerData;
 						
 					case "content:encoded":
-						post.content = element.innerData;
+						
+						// as a rule of thumb, we DO need the raw HTML that's stored in the 
+						// XML. However, we should at least escape the HTML that's wihin the
+						// code blocks.
+						
+						// also we need to go from line break to <p>
+						
+						var rawContent = element.innerData;
+						
+						var escape = ~/\[code.*?\/code\]/s;
+						
+						rawContent = escape.customReplace(rawContent, escapeHtml);
+						
+						post.content = rawContent;
 						
 					case "wp:post_date":
 						post.date = Date.fromString(element.innerData);
@@ -52,6 +65,11 @@ class Parser
 		}
 		
 		return posts;
+	}
+	
+	static function escapeHtml(e : EReg) : String
+	{
+		return StringTools.htmlEscape(e.matched(0));
 	}
 	
 	static function pad(value : Int) : String
