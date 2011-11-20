@@ -39,7 +39,8 @@ class Parser
 						
 						rawContent = escape.customReplace(rawContent, escapeHtml);
 						
-						rawContent = StringTools.replace(rawContent, "\r\n", "<br>");
+						// then we need to go from the plain line breaks to brs
+						rawContent = StringTools.replace(rawContent, "\r\n", "<br/>");
 						
 						post.content = rawContent;
 						
