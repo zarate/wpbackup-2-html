@@ -1,0 +1,11 @@
+My WordPress blog has been hacked, and for the time being I've decided to at least recover the content.
+
+Luckily for me I had a recent backup and the DB looks good.
+
+I could just re-install WP and import the backup, but I can't be bothered with maintaining WP again.
+
+This is a tool to go from WP's 3.2.1 backup file to a set of static HTML pages following WP's permalink structure.
+
+User at your own risk!
+
+JD
