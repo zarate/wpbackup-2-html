@@ -1,6 +1,7 @@
 package;
 
 import Arguments.Argument;
+import haxe.Template;
 
 class Main
 {	
@@ -8,9 +9,19 @@ class Main
 	
 	var outputFolderPath : String;
 	
+	var templateFolderPath : String;
+	
 	var posts : Array<Post>;
 	
 	static var DEFAULT_OUTPUT_FOLDER_PATH : String = "output";
+	
+	static var DEFAULT_TEMPLATE_FOLDER_PATH : String = "templates";
+	
+	static var MAIN_TEMPLATE_PATH : String = "template.html";
+	
+	static var INDEX_TEMPLATE_PATH : String = "index.html";
+	
+	static var POST_TEMPLATE_PATH : String = "post.html";
 	
 	function new()
 	{
@@ -38,6 +49,9 @@ class Main
 					
 				case Argument.OUTPUT_FOLDER_PATH:
 					outputFolderPath = args[i+1];
+					
+				case Argument.TEMPLATE_FOLDER_PATH:
+					templateFolderPath = args[i+1];
 				
 			}
 		}
@@ -52,6 +66,13 @@ class Main
 			log("Going to use default output folder path: " + DEFAULT_OUTPUT_FOLDER_PATH);
 			
 			outputFolderPath = DEFAULT_OUTPUT_FOLDER_PATH;
+		}
+		
+		if(null == templateFolderPath)
+		{
+			log("Going to use defatult template folder path: " + DEFAULT_TEMPLATE_FOLDER_PATH);
+			
+			templateFolderPath = DEFAULT_TEMPLATE_FOLDER_PATH;
 		}
 	}
 	
@@ -77,40 +98,68 @@ class Main
 		
 		xa.Folder.create(outputFolderPath);
 		
+		var indexTemplatePath = templateFolderPath + xa.System.getSeparator() + INDEX_TEMPLATE_PATH;
+		
+		if(!xa.File.isFile(indexTemplatePath))
+		{
+			exit("Cannot read index template file: " + indexTemplatePath);
+		}
+		
+		var indexTemplate = new haxe.Template(xa.File.read(indexTemplatePath));
+		xa.File.write(outputFolderPath + xa.System.getSeparator() + "index.html", renderPage(indexTemplate.execute({posts: posts})));
+		
+		var postTemplatePath = templateFolderPath + xa.System.getSeparator() + POST_TEMPLATE_PATH;
+		
+		if(!xa.File.isFile(postTemplatePath))
+		{
+			exit("Cannot read post template file: " + postTemplatePath);
+		}
+		
+		var postTemplateContent = xa.File.read(postTemplatePath);
+		
 		for(post in posts)
 		{
 			var postFolder = createDateFolder(post);
 			
-			var postContent = post.content;
+			var postTemplate = new haxe.Template(postTemplateContent);
 			
-			xa.File.write(postFolder + xa.System.UNIX_SEPARATOR + "index.htm", postContent);
+			// this back to index thing is far from elegant, i know
+			var backToIndexLink = "index.html";
+			
+			var postDeepness = post.relativeLink.split(xa.System.UNIX_SEPARATOR).length;
+			
+			for(i in 0...postDeepness)
+			{
+				backToIndexLink = "../" + backToIndexLink;
+			}
+			
+			xa.File.write(postFolder + xa.System.UNIX_SEPARATOR + "index.htm", renderPage(postTemplate.execute({content: post.content, linkToIndex: backToIndexLink}), post.title));
 		}
+	}
+	
+	function renderPage(content : String, ?title : String = "") : String
+	{
+		var mainTemplate = new haxe.Template(xa.File.read(templateFolderPath + xa.System.getSeparator() + MAIN_TEMPLATE_PATH));
+		return mainTemplate.execute({content: content, title: title});
 	}
 	
 	function createDateFolder(post : Post) : String
 	{
-		// Date.getMenth() is 0-based, we need to add 1 for a human readable version
-		var bits = [post.date.getFullYear(), post.date.getMonth() + 1, post.date.getDate()];
-		
-		// start with the root of the output folder
+		// start at the root of the output folder
 		var fullFolderPath = outputFolderPath;
 		
-		// then we create the YYYY-MM-DD folder structure if needed
-		for(bit in bits)
+		// then we create the YYYY/MM/DD/post-title folder structure as needed
+		var folders = post.relativeLink.split(xa.System.UNIX_SEPARATOR);
+		
+		for(folder in folders)
 		{
-			fullFolderPath += xa.System.UNIX_SEPARATOR + StringTools.lpad(Std.string(bit), "0", 2);
+			fullFolderPath += xa.System.UNIX_SEPARATOR + folder;
 			
 			if(!xa.Folder.isFolder(fullFolderPath))
 			{
 				xa.Folder.create(fullFolderPath);
 			}
 		}
-		
-		// finally, we add the post's "name", which is WP's
-		// way of calling the web safe title
-		fullFolderPath += xa.System.UNIX_SEPARATOR + post.name;
-		
-		xa.Folder.create(fullFolderPath);
 		
 		return fullFolderPath;
 	}
@@ -130,6 +179,9 @@ class Main
 		xa.Utils.print(txt);
 	}
 	
+	/**
+	 * Application's entry point
+	 */
 	public static function main()
 	{
 		new Main();

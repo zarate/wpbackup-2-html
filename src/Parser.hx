@@ -36,6 +36,14 @@ class Parser
 				}
 			}
 			
+			// we need to put together a structure like:
+			// 		YYYY/MM/DD/web-safe-title
+			
+			// Date.getMenth() is 0-based, we need to add 1 for a human readable version
+			var bits = [pad(post.date.getFullYear()), pad(post.date.getMonth() + 1), pad(post.date.getDate()), post.name];
+			
+			post.relativeLink  = bits.join(xa.System.UNIX_SEPARATOR);
+			
 			// only return published posts and pages
 			if(post.status == "publish")
 			{
@@ -44,5 +52,10 @@ class Parser
 		}
 		
 		return posts;
+	}
+	
+	static function pad(value : Int) : String
+	{
+		return StringTools.lpad(Std.string(value), "0", 2);
 	}
 }
