@@ -1,4 +1,4 @@
-My WordPress blog (http://blog.zarate.tv/) was hacked so I decided to at least recover the content.
+My WordPress blog (http://blog.zarate.tv/) was hacked (you can read about it here: https://plus.google.com/u/0/116335321298644733410/posts/Twa8esjctBd) so I decided to at least recover the content.
 
 Luckily for me I had a recent backup and the DB looked good (no hacky HTML/JS on posts).
 
@@ -15,6 +15,7 @@ What it doesn't do:
 
 * Clean up your DB of dodgy-spamy links (you are royally screwed if this is your case).
 * Adapt to every single WP permalink structure (it follows the YYYY/MM/DD/post-title structure only).
+* Give you back your images or other files you hosted yourself. These are not part of the backup, so not much to do here.
 
 What it _might_ do:
 
