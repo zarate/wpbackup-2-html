@@ -2,6 +2,7 @@ package;
 
 import Arguments.Argument;
 import haxe.Template;
+import Item.ItemType;
 
 class Main
 {	
@@ -11,7 +12,7 @@ class Main
 	
 	var templateFolderPath : String;
 	
-	var posts : Array<Post>;
+	var items : Array<Item>;
 	
 	static var DEFAULT_OUTPUT_FOLDER_PATH : String = "output";
 	
@@ -88,13 +89,13 @@ class Main
 			exit(wpBackupFilePath + " is not a valid file");
 		}
 		
-		posts = Parser.parse(xa.File.read(wpBackupFilePath));
-		posts.sort(sortByDate);
+		items = Parser.parse(xa.File.read(wpBackupFilePath));
+		items.sort(sortByDate);
 		
-		log("Found " + posts.length + " posts");
+		log("Found " + items.length + " items");
 	}
 	
-	function sortByDate(a : Post, b : Post) : Int
+	function sortByDate(a : Item, b : Item) : Int
 	{
 		var ret : Int = null;
 		
@@ -126,15 +127,9 @@ class Main
 		
 		xa.Folder.create(outputFolderPath);
 		
-		var indexTemplatePath = templateFolderPath + xa.System.getSeparator() + INDEX_TEMPLATE_PATH;
+		var posts = [];
+		var pages = [];
 		
-		if(!xa.File.isFile(indexTemplatePath))
-		{
-			exit("Cannot read index template file: " + indexTemplatePath);
-		}
-		
-		var indexTemplate = new haxe.Template(xa.File.read(indexTemplatePath));
-		xa.File.write(outputFolderPath + xa.System.getSeparator() + "index.html", renderPage(indexTemplate.execute({posts: posts})));
 		
 		var postTemplatePath = templateFolderPath + xa.System.getSeparator() + POST_TEMPLATE_PATH;
 		
@@ -145,24 +140,44 @@ class Main
 		
 		var postTemplateContent = xa.File.read(postTemplatePath);
 		
-		for(post in posts)
+		for(item in items)
 		{
-			var postFolder = createDateFolder(post);
+			switch(item.type)
+			{
+				case ItemType.POST:
+					posts.push(item);
+					
+				case ItemType.PAGE:
+					pages.push(item);
+			}
+			
+			var postFolder = createDateFolder(item);
 			
 			var postTemplate = new haxe.Template(postTemplateContent);
 				
 			// this back to index thing is far from elegant, i know
 			var backToIndexLink = "index.html";
 			
-			var postDeepness = post.relativeLink.split(xa.System.UNIX_SEPARATOR).length;
+			var postDeepness = item.relativeLink.split(xa.System.UNIX_SEPARATOR).length;
 			
 			for(i in 0...postDeepness)
 			{
 				backToIndexLink = "../" + backToIndexLink;
 			}
 			
-			xa.File.write(postFolder + xa.System.UNIX_SEPARATOR + "index.htm", renderPage(postTemplate.execute({content: post.content, title: post.title, linkToIndex: backToIndexLink}), post.title));
+			xa.File.write(postFolder + xa.System.UNIX_SEPARATOR + "index.htm", renderPage(postTemplate.execute({content: item.content, title: item.title, linkToIndex: backToIndexLink}), item.title));
 		}
+		
+		var indexTemplatePath = templateFolderPath + xa.System.getSeparator() + INDEX_TEMPLATE_PATH;
+		
+		if(!xa.File.isFile(indexTemplatePath))
+		{
+			exit("Cannot read index template file: " + indexTemplatePath);
+		}
+		
+		var indexTemplate = new haxe.Template(xa.File.read(indexTemplatePath));
+		
+		xa.File.write(outputFolderPath + xa.System.getSeparator() + "index.html", renderPage(indexTemplate.execute({posts: posts, pages: pages})));
 	}
 	
 	function renderPage(content : String, ?title : String = "") : String
@@ -171,13 +186,13 @@ class Main
 		return mainTemplate.execute({content: content, title: title});
 	}
 	
-	function createDateFolder(post : Post) : String
+	function createDateFolder(item : Item) : String
 	{
 		// start at the root of the output folder
 		var fullFolderPath = outputFolderPath;
 		
 		// then we create the YYYY/MM/DD/post-title folder structure as needed
-		var folders = post.relativeLink.split(xa.System.UNIX_SEPARATOR);
+		var folders = item.relativeLink.split(xa.System.UNIX_SEPARATOR);
 		
 		for(folder in folders)
 		{

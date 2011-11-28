@@ -1,31 +1,31 @@
-import Post.PostType;
+import Item.ItemType;
 
 class Parser
 {
-	public static function parse(content : String) : Array<Post>
+	public static function parse(content : String) : Array<Item>
 	{
-		var posts = [];
+		var items = [];
 		
 		var xml = Xml.parse(content);
 		
 		// first get the list of all the posts, pages, etc,
 		// this includes drafts
-		var items = new haxe.xml.Fast(xml.firstElement()).node.channel.nodes.item;
+		var itemNodes = new haxe.xml.Fast(xml.firstElement()).node.channel.nodes.item;
 		
-		for(item in items)
+		for(itemNode in itemNodes)
 		{
-			var post : Post = new Post();
-			post.title = item.node.title.innerData;
-			post.link = (item.hasNode.link)? item.node.link.innerData : null;
+			var item = new Item();
+			item.title = itemNode.node.title.innerData;
+			item.link = (itemNode.hasNode.link)? itemNode.node.link.innerData : null;
 			
 			// i'm having trouble with namespaces in the WP XML, so
 			// we'll brute force it for the time being
-			for(element in item.elements)
+			for(element in itemNode.elements)
 			{
 				switch(element.name)
 				{
 					case "wp:status":
-						post.status = element.innerData;
+						item.status = element.innerData;
 						
 					case "content:encoded":
 						
@@ -41,20 +41,20 @@ class Parser
 						// then we need to go from plain line breaks to brs
 						rawContent = StringTools.replace(rawContent, "\r\n", "<br/>");
 						
-						post.content = rawContent;
+						item.content = rawContent;
 						
 					case "wp:post_date":
-						post.date = Date.fromString(element.innerData);
+						item.date = Date.fromString(element.innerData);
 						
 					case "wp:post_name":
-						post.name = element.innerData;
+						item.name = element.innerData;
 						
 					case "wp:post_type":
 						
 						switch(element.innerData)
 						{
-							case "post": post.type = PostType.POST;
-							case "page": post.type = PostType.PAGE;
+							case "post": item.type = ItemType.POST;
+							case "page": item.type = ItemType.PAGE;
 						}
 				}
 			}
@@ -65,26 +65,26 @@ class Parser
 			
 			var bits = null;
 			
-			if(post.type == PostType.POST)
+			if(item.type == ItemType.POST)
 			{
 				// Date.getMenth() is 0-based, we need to add 1 for a human readable version
-				bits = [pad(post.date.getFullYear()), pad(post.date.getMonth() + 1), pad(post.date.getDate()), post.name];
+				bits = [pad(item.date.getFullYear()), pad(item.date.getMonth() + 1), pad(item.date.getDate()), item.name];
 			}
 			else
 			{
-				bits = [post.name];
+				bits = [item.name];
 			}
 			
-			post.relativeLink  = bits.join(xa.System.UNIX_SEPARATOR);
+			item.relativeLink  = bits.join(xa.System.UNIX_SEPARATOR);
 			
 			// only return published posts and pages
-			if(post.status == "publish")
+			if(item.status == "publish")
 			{
-				posts.push(post);
+				items.push(item);
 			}
 		}
 		
-		return posts;
+		return items;
 	}
 	
 	static function escapeHtml(e : EReg) : String

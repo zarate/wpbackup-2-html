@@ -1,5 +1,21 @@
+::if pages::
+
+<h2>Pages</h2>
+<ul>
+	::foreach pages::
+	<li><a href="::relativeLink::">::title::</a></li>
+	::end::
+</ul>
+
+::end::
+
+::if posts::
+
+<h2>Posts</h2>
 <ul>
 	::foreach posts::
 	<li><a href="::relativeLink::">::title::</a></li>
 	::end::
 </ul>
+
+::end::

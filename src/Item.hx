@@ -1,10 +1,10 @@
-enum PostType
+enum ItemType
 {
 	PAGE;
 	POST;
 }
 
-class Post 
+class Item 
 {
 	public function new(){}
 	
@@ -15,5 +15,5 @@ class Post
 	public var content : String;
 	public var name : String;
 	public var date : Date;
-	public var type : PostType;
+	public var type : ItemType;
 }
