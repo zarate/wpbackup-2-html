@@ -1,3 +1,5 @@
+import Post.PostType;
+
 class Parser
 {
 	public static function parse(content : String) : Array<Post>
@@ -30,13 +32,13 @@ class Parser
 						var rawContent = element.innerData;
 						
 						// as a rule of thumb, we DO need the raw HTML that's stored in the 
-						// XML. However, we should at least escape the HTML that's wihin the
+						// XML. However, we should at least escape the HTML that's within the
 						// [code][/code] blocks.
 						
 						var escape = ~/\[code.*?\/code\]/s;
 						rawContent = escape.customReplace(rawContent, escapeHtml);
 						
-						// then we need to go from the plain line breaks to brs
+						// then we need to go from plain line breaks to brs
 						rawContent = StringTools.replace(rawContent, "\r\n", "<br/>");
 						
 						post.content = rawContent;
@@ -46,14 +48,32 @@ class Parser
 						
 					case "wp:post_name":
 						post.name = element.innerData;
+						
+					case "wp:post_type":
+						
+						switch(element.innerData)
+						{
+							case "post": post.type = PostType.POST;
+							case "page": post.type = PostType.PAGE;
+						}
 				}
 			}
 			
-			// we need to put together a structure like:
-			// 		YYYY/MM/DD/web-safe-title
+			// we need to put together a permalink structure either:
+			// 		for posts: YYYY/MM/DD/web-safe-title
+			// 		for pages: web-safe-title
 			
-			// Date.getMenth() is 0-based, we need to add 1 for a human readable version
-			var bits = [pad(post.date.getFullYear()), pad(post.date.getMonth() + 1), pad(post.date.getDate()), post.name];
+			var bits = null;
+			
+			if(post.type == PostType.POST)
+			{
+				// Date.getMenth() is 0-based, we need to add 1 for a human readable version
+				bits = [pad(post.date.getFullYear()), pad(post.date.getMonth() + 1), pad(post.date.getDate()), post.name];
+			}
+			else
+			{
+				bits = [post.name];
+			}
 			
 			post.relativeLink  = bits.join(xa.System.UNIX_SEPARATOR);
 			

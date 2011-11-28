@@ -1,3 +1,9 @@
+enum PostType
+{
+	PAGE;
+	POST;
+}
+
 class Post 
 {
 	public function new(){}
@@ -9,4 +15,5 @@ class Post
 	public var content : String;
 	public var name : String;
 	public var date : Date;
+	public var type : PostType;
 }
