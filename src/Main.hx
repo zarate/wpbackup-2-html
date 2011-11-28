@@ -25,9 +25,7 @@ class Main
 	
 	function new()
 	{
-		
-		log("Welcome to the Wordpress to HTML recovery tool");
-		log("We'll do our best");
+		log("Welcome to the Wordpress to HTML recovery tool. Fingers crossed.");
 		
 		parseArguments();
 		
@@ -39,6 +37,11 @@ class Main
 	function parseArguments() : Void
 	{
 		var args = xa.Application.getArguments();
+		
+		if(args.length <= 0)
+		{
+			printHelp();
+		}
 		
 		for(i in 0...args.length)
 		{
@@ -53,6 +56,8 @@ class Main
 				case Argument.TEMPLATE_FOLDER_PATH:
 					templateFolderPath = args[i+1];
 				
+				case Argument.HELP:
+					printHelp();
 			}
 		}
 		
@@ -185,6 +190,19 @@ class Main
 		}
 		
 		return fullFolderPath;
+	}
+	
+	function printHelp() : Void
+	{
+		var help = [];
+		
+		help.push("Options:");
+		help.push("\t-wp: path to the WordPress backup file. Mandatory.");
+		help.push("\t-o: output folder path. Optional, defaults to: " + DEFAULT_OUTPUT_FOLDER_PATH);
+		help.push("\t-t: template folder path. Optional, defatuls to: " + DEFAULT_TEMPLATE_FOLDER_PATH);
+		help.push("\t-h: prints this help!");
+		
+		exit(help.join("\n"));
 	}
 	
 	function exit(?txt : String) : Void
