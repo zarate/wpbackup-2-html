@@ -22,9 +22,9 @@ class Main
 	
 	static var MAIN_TEMPLATE_PATH : String = "template.html";
 	
-	static var INDEX_TEMPLATE_PATH : String = "index.html";
-	
 	static var POST_TEMPLATE_PATH : String = "post.html";
+	
+	static var HTML_PAGE_FILE : String = "index.html";
 	
 	function new()
 	{
@@ -157,7 +157,7 @@ class Main
 			var postTemplate = new haxe.Template(postTemplateContent);
 				
 			// this back to index thing is far from elegant, i know
-			var backToIndexLink = "index.html";
+			var backToIndexLink = HTML_PAGE_FILE;
 			
 			var postDeepness = item.relativeLink.split(xa.System.UNIX_SEPARATOR).length;
 			
@@ -166,10 +166,10 @@ class Main
 				backToIndexLink = "../" + backToIndexLink;
 			}
 			
-			xa.File.write(postFolder + xa.System.UNIX_SEPARATOR + "index.htm", renderPage(postTemplate.execute({content: item.content, title: item.title, linkToIndex: backToIndexLink}), item.title));
+			xa.File.write(postFolder + xa.System.UNIX_SEPARATOR + HTML_PAGE_FILE, renderPage(postTemplate.execute({content: item.content, title: item.title, linkToIndex: backToIndexLink}), item.title));
 		}
 		
-		var indexTemplatePath = templateFolderPath + xa.System.getSeparator() + INDEX_TEMPLATE_PATH;
+		var indexTemplatePath = templateFolderPath + xa.System.getSeparator() + HTML_PAGE_FILE;
 		
 		if(!xa.File.isFile(indexTemplatePath))
 		{
@@ -178,7 +178,7 @@ class Main
 		
 		var indexTemplate = new haxe.Template(xa.File.read(indexTemplatePath));
 		
-		xa.File.write(outputFolderPath + xa.System.getSeparator() + "index.html", renderPage(indexTemplate.execute({posts: posts, pages: pages})));
+		xa.File.write(outputFolderPath + xa.System.getSeparator() + HTML_PAGE_FILE, renderPage(indexTemplate.execute({posts: posts, pages: pages})));
 		
 		// if there's an asset folder (css, js, images, etc), let's copy it over
 		if(xa.Folder.isFolder(templateFolderPath))
