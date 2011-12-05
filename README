@@ -29,6 +29,6 @@ Let me know if you need anything else.
 To compile simple call compile.sh (requires bin folder and XAPI, install by typing haxelib install xapi).
 Then call neko bin/wpbackup-2-html.n for how to use.
 
-User at your own risk : )
+Use at your own risk : )
 
 JD
