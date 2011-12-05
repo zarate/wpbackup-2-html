@@ -18,6 +18,8 @@ class Main
 	
 	static var DEFAULT_TEMPLATE_FOLDER_PATH : String = "templates";
 	
+	static var ASSETS_FOLDER_NAME : String = "assets";
+	
 	static var MAIN_TEMPLATE_PATH : String = "template.html";
 	
 	static var INDEX_TEMPLATE_PATH : String = "index.html";
@@ -130,7 +132,6 @@ class Main
 		var posts = [];
 		var pages = [];
 		
-		
 		var postTemplatePath = templateFolderPath + xa.System.getSeparator() + POST_TEMPLATE_PATH;
 		
 		if(!xa.File.isFile(postTemplatePath))
@@ -178,6 +179,12 @@ class Main
 		var indexTemplate = new haxe.Template(xa.File.read(indexTemplatePath));
 		
 		xa.File.write(outputFolderPath + xa.System.getSeparator() + "index.html", renderPage(indexTemplate.execute({posts: posts, pages: pages})));
+		
+		// if there's an asset folder (css, js, images, etc), let's copy it over
+		if(xa.Folder.isFolder(templateFolderPath))
+		{
+			xa.Folder.copy(templateFolderPath + xa.System.getSeparator() + ASSETS_FOLDER_NAME, outputFolderPath + xa.System.getSeparator() + ASSETS_FOLDER_NAME);
+		}
 	}
 	
 	function renderPage(content : String, ?title : String = "") : String
